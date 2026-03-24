@@ -62,11 +62,7 @@ export default function App() {
     setShowSuccess(false);
 
     try {
-      const imageData = await generateGreetingImage(
-        selectedGreeting,
-        name,
-        currentTemplateIndex,
-      );
+      const imageData = await generateGreetingImage(selectedGreeting, name);
       setGeneratedImage(imageData);
       setCurrentTemplateIndex(0);
 
@@ -92,11 +88,7 @@ export default function App() {
     try {
       const templateCount = getTemplateCount(selectedGreeting);
       const nextIndex = (currentTemplateIndex + 1) % Math.max(templateCount, 1);
-      const imageData = await generateGreetingImage(
-        selectedGreeting,
-        name,
-        nextIndex,
-      );
+      const imageData = await generateGreetingImage(selectedGreeting, name);
       setGeneratedImage(imageData);
       setCurrentTemplateIndex(nextIndex);
       showToast("Nova imagem gerada!");

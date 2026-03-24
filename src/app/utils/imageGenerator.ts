@@ -5,8 +5,14 @@ interface ImageTemplate {
 }
 
 const PEXELS_PER_PAGE = 20;
+const RECENT_HISTORY_LIMIT = 8;
 
 const imageCache: Record<string, string[]> = {};
+const recentImagesByGreeting: Record<GreetingType, string[]> = {
+  morning: [],
+  afternoon: [],
+  night: [],
+};
 
 const templates: Record<GreetingType, ImageTemplate[]> = {
   morning: [
@@ -186,21 +192,6 @@ const greetingMessages: Record<GreetingType, string[]> = {
     "☀️ Que a luz desta manhã ilumine o seu caminho.",
     "🌻 Tenha um dia cheio de bons encontros.",
     "🌿 Que sua manhã seja suave e agradável.",
-    "😊 Que o dia traga sorrisos sinceros.",
-    "🍀 Bom dia com carinho e boas energias.",
-    "🌅 Que sua jornada hoje seja leve e feliz.",
-    "💛 Aproveite o dia com calma e gratidão.",
-    "☕ Desejo um despertar tranquilo e cheio de paz.",
-    "🌼 Que o seu dia tenha pequenos momentos felizes.",
-    "🌤️ Bom dia com muito carinho para você.",
-    "🌸 Que o amanhecer renove sua disposição.",
-    "✨ Hoje é um bom dia para viver algo bonito.",
-    "🌞 Que a manhã te abrace com tranquilidade.",
-    "🍃 Que seu coração amanheça em paz.",
-    "😊 Desejo uma manhã cheia de serenidade.",
-    "🌷 Bom dia com afeto e boas vibrações.",
-    "💫 Que o hoje seja melhor do que ontem.",
-    "🌿 Uma linda manhã para você.",
   ],
   afternoon: [
     "🌤️ Que sua tarde siga leve e bonita.",
@@ -221,23 +212,6 @@ const greetingMessages: Record<GreetingType, string[]> = {
     "🍀 Que a paz acompanhe suas próximas horas.",
     "🌿 Desejo uma tarde calma e feliz.",
     "✨ Que o dia continue te surpreendendo positivamente.",
-    "☕ Um descanso, um respiro e uma boa tarde.",
-    "🌸 Que a sua tarde seja leve por dentro e por fora.",
-    "💫 Continue o dia com esperança e ânimo.",
-    "🌤️ Boa tarde com muita leveza.",
-    "🌺 Que o restante do dia seja tranquilo.",
-    "🍃 Uma tarde agradável faz bem ao coração.",
-    "😊 Desejo que sua tarde seja cheia de harmonia.",
-    "🌞 Que seu dia siga bonito até o fim.",
-    "💛 Boa tarde com boas vibrações.",
-    "🌻 Aproveite a beleza simples deste momento.",
-    "🌼 Que sua tarde seja doce e serena.",
-    "☀️ O dia ainda pode guardar coisas boas para você.",
-    "🌿 Que a tranquilidade esteja presente na sua tarde.",
-    "🍀 Boa tarde com calma e esperança.",
-    "✨ Desejo que tudo corra bem no seu dia.",
-    "☕ Uma tarde de paz e aconchego para você.",
-    "🌈 Continue o dia com leveza no coração.",
   ],
   night: [
     "🌙 Que sua noite seja calma e tranquila.",
@@ -258,38 +232,38 @@ const greetingMessages: Record<GreetingType, string[]> = {
     "💫 Bons sonhos e coração tranquilo.",
     "🌙 Que você tenha um descanso profundo e leve.",
     "⭐ Boa noite com afeto e tranquilidade.",
-    "🕯️ Que seu final de dia seja calmo e bonito.",
-    "🌠 A noite também é um presente de paz.",
-    "💙 Descanse bem e cuide de você.",
-    "🌃 Que sua noite seja silenciosa e agradável.",
-    "✨ Um fim de dia cheio de serenidade para você.",
-    "😊 Boa noite e bons pensamentos.",
-    "🌙 Que a calma da noite te faça bem.",
-    "💫 Hora de relaxar e renovar as energias.",
-    "🌌 Tenha uma noite de paz e descanso.",
-    "⭐ Bons sonhos e um amanhecer leve.",
-    "🕯️ Que o coração encontre descanso nesta noite.",
-    "💙 Uma noite tranquila para você.",
-    "🌠 Que o silêncio da noite traga paz.",
-    "✨ Boa noite com muita leveza.",
-    "😊 Desejo um descanso cheio de serenidade.",
-    "🌙 Que a noite seja acolhedora e bonita.",
-    "💫 Descanse e recarregue as energias.",
   ],
 };
 
-async function buscarImagem(
-  query: string,
-  preferredIndex?: number,
-): Promise<string> {
+function randomIndex(length: number): number {
+  return Math.floor(Math.random() * length);
+}
+
+function pickRandomUnique<T>(items: T[], recent: T[] = []): T | null {
+  if (!items.length) return null;
+
+  const filtered = items.filter((item) => !recent.includes(item));
+
+  if (filtered.length > 0) {
+    return filtered[randomIndex(filtered.length)];
+  }
+
+  return items[randomIndex(items.length)];
+}
+
+function pushRecent(greetingType: GreetingType, imageUrl: string) {
+  const history = recentImagesByGreeting[greetingType];
+  history.push(imageUrl);
+
+  while (history.length > RECENT_HISTORY_LIMIT) {
+    history.shift();
+  }
+}
+
+async function buscarImagensDaQuery(query: string): Promise<string[]> {
   try {
     if (imageCache[query] && imageCache[query].length > 0) {
-      const fotos = imageCache[query];
-      const index =
-        preferredIndex !== undefined
-          ? preferredIndex % fotos.length
-          : Math.floor(Math.random() * fotos.length);
-      return fotos[index];
+      return imageCache[query];
     }
 
     const response = await fetch(
@@ -314,35 +288,36 @@ async function buscarImagem(
         )
         ?.filter(Boolean) || [];
 
-    if (!fotos.length) {
-      return "";
-    }
-
     imageCache[query] = fotos;
-
-    const index =
-      preferredIndex !== undefined
-        ? preferredIndex % fotos.length
-        : Math.floor(Math.random() * fotos.length);
-
-    return fotos[index];
+    return fotos;
   } catch (err) {
-    console.error("Erro API, usando fallback", err);
-    return "";
+    console.error("Erro API na query:", query, err);
+    return [];
   }
 }
 
-function getRandomMessage(
+async function buscarImagemAleatoria(
   greetingType: GreetingType,
-  templateIndex?: number,
-): string {
-  const messages = greetingMessages[greetingType];
-  const index =
-    templateIndex !== undefined
-      ? templateIndex % messages.length
-      : Math.floor(Math.random() * messages.length);
+): Promise<string> {
+  const queryOptions = [...queries[greetingType]].sort(() => Math.random() - 0.5);
+  const history = recentImagesByGreeting[greetingType];
 
-  return messages[index];
+  for (const query of queryOptions) {
+    const fotos = await buscarImagensDaQuery(query);
+    const escolhida = pickRandomUnique(fotos, history);
+
+    if (escolhida) {
+      pushRecent(greetingType, escolhida);
+      return escolhida;
+    }
+  }
+
+  return "";
+}
+
+function getRandomMessage(greetingType: GreetingType): string {
+  const messages = greetingMessages[greetingType];
+  return messages[randomIndex(messages.length)];
 }
 
 function wrapText(
@@ -401,7 +376,6 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 export async function generateGreetingImage(
   greetingType: GreetingType,
   name: string = "",
-  templateIndex?: number,
 ): Promise<string> {
   const canvas = document.createElement("canvas");
   canvas.width = 800;
@@ -411,24 +385,13 @@ export async function generateGreetingImage(
   if (!context) return "";
   const ctx = context;
 
-  const queryOptions = queries[greetingType];
-  const selectedQueryIndex =
-    templateIndex !== undefined
-      ? templateIndex % queryOptions.length
-      : Math.floor(Math.random() * queryOptions.length);
-
-  const selectedQuery = queryOptions[selectedQueryIndex];
-
-  let imageUrl = await buscarImagem(selectedQuery, templateIndex);
+  let imageUrl = await buscarImagemAleatoria(greetingType);
 
   if (!imageUrl) {
     const fallbackOptions = templates[greetingType];
-    const fallbackIndex =
-      templateIndex !== undefined
-        ? templateIndex % fallbackOptions.length
-        : Math.floor(Math.random() * fallbackOptions.length);
-
-    imageUrl = fallbackOptions[fallbackIndex].backgroundUrl;
+    const fallback =
+      fallbackOptions[randomIndex(fallbackOptions.length)];
+    imageUrl = fallback.backgroundUrl;
   }
 
   const greetingTexts = {
@@ -439,7 +402,7 @@ export async function generateGreetingImage(
 
   const greeting = greetingTexts[greetingType];
   const nameText = name ? `, ${name}!` : "!";
-  const message = getRandomMessage(greetingType, templateIndex);
+  const message = getRandomMessage(greetingType);
 
   function desenharImagem(imagem: HTMLImageElement) {
     const scale = Math.max(
@@ -479,14 +442,10 @@ export async function generateGreetingImage(
     drawMultilineText(ctx, lines, canvas.width / 2, messageStartY, 44);
 
     ctx.shadowBlur = 8;
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.font = "18px Arial";
+    ctx.fillStyle = "rgba(255,255,255,0.82)";
     ctx.textAlign = "right";
-    ctx.fillText(
-      "bom-dia-gerador.vercel.app",
-      canvas.width - 20,
-      canvas.height - 20,
-    );
+    ctx.fillText("bom-dia-gerador.vercel.app", canvas.width - 20, canvas.height - 20);
 
     return canvas.toDataURL("image/png");
   }
@@ -494,16 +453,11 @@ export async function generateGreetingImage(
   try {
     const imagem = await loadImage(imageUrl);
     return desenharImagem(imagem);
-  } catch (error) {
+  } catch {
     try {
       const fallbackOptions = templates[greetingType];
-      const fallbackIndex =
-        templateIndex !== undefined
-          ? templateIndex % fallbackOptions.length
-          : Math.floor(Math.random() * fallbackOptions.length);
-
       const fallbackImg = await loadImage(
-        fallbackOptions[fallbackIndex].backgroundUrl,
+        fallbackOptions[randomIndex(fallbackOptions.length)].backgroundUrl,
       );
       return desenharImagem(fallbackImg);
     } catch {
