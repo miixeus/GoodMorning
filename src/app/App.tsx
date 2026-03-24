@@ -238,7 +238,7 @@ Crie também: https://good-morning-rust.vercel.app`;
                     className={[
                       "text-base transition-all duration-500",
                       selectedGreeting
-                        ? "text-[#00cf40] opacity-100 translate-y-0"
+                        ? "text-[#000000] opacity-100 translate-y-0"
                         : "text-[#717182] opacity-80",
                     ].join(" ")}
                   >
