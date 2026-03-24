@@ -482,7 +482,11 @@ export async function generateGreetingImage(
     ctx.font = "20px Arial";
     ctx.fillStyle = "rgba(255,255,255,0.75)";
     ctx.textAlign = "right";
-    ctx.fillText("seusite.com", canvas.width - 20, canvas.height - 20);
+    ctx.fillText(
+      "bom-dia-gerador.vercel.app",
+      canvas.width - 20,
+      canvas.height - 20,
+    );
 
     return canvas.toDataURL("image/png");
   }
