@@ -114,7 +114,7 @@ export default function App() {
       const nameText = name ? `, ${name}!` : "!";
       const shareText = `${greeting}${nameText}
 
-Crie também: https://SEU-DOMINIO.com`;
+Crie também: https://good-morning-rust.vercel.app/`;
 
       // converte dataURL/base64 em Blob
       const response = await fetch(generatedImage);
