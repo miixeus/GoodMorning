@@ -26,8 +26,6 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-
-
   const greetings = [
     { type: "morning" as GreetingType, emoji: "🌞", text: "Bom dia" },
     { type: "afternoon" as GreetingType, emoji: "🌇", text: "Boa tarde" },
@@ -256,16 +254,16 @@ Crie também: https://good-morning-rust.vercel.app/`;
                 </div>
                 <AdBanner />
 
-                {/* Template Counter */}
+                {/* Template Counter 
                 <div
                   className="text-center text-[#717182] animate-in fade-in duration-300"
                   style={{ animationDelay: "100ms" }}
                 >
                   <span className="text-base bg-[#f5f5f5] px-4 py-2 rounded-full inline-block">
-                    Imagem {currentTemplateIndex + 1} de{" "}
+                    Variação {currentTemplateIndex + 1} de{" "}
                     {getTemplateCount(selectedGreeting!)}
                   </span>
-                </div>
+                </div>*/}
 
                 {/* Refresh Button */}
                 <div
