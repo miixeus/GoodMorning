@@ -135,7 +135,7 @@ export default function App() {
       const nameText = name ? `, ${name}!` : "!";
       const shareText = `${greeting}${nameText}
 
-Crie também: https://good-morning-rust.vercel.app`;
+      Crie também: https://bom-dia-gerador.vercel.app/`;
 
       const response = await fetch(generatedImage);
       const blob = await response.blob();
