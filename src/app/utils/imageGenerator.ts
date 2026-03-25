@@ -5,9 +5,10 @@ interface ImageTemplate {
 }
 
 const PEXELS_PER_PAGE = 20;
-const RECENT_HISTORY_LIMIT = 8;
+const RECENT_HISTORY_LIMIT = 10;
 
 const imageCache: Record<string, string[]> = {};
+
 const recentImagesByGreeting: Record<GreetingType, string[]> = {
   morning: [],
   afternoon: [],
@@ -71,103 +72,345 @@ const templates: Record<GreetingType, ImageTemplate[]> = {
   ],
 };
 
-const queries: Record<GreetingType, string[]> = {
-  morning: [
-    "sunrise landscape",
-    "morning coffee",
-    "flowers morning light",
-    "golden sunrise nature",
-    "peaceful morning window",
-    "morning beach sunrise",
-    "breakfast table sunlight",
-    "morning sky clouds",
-    "sunrise mountains",
-    "morning garden flowers",
-    "morning sea view",
-    "morning countryside",
-    "window sunlight morning",
-    "fresh dew leaves",
-    "sunlight through trees",
-    "morning lake reflection",
-    "calm sunrise horizon",
-    "cozy breakfast morning",
-    "sunrise over ocean",
-    "early morning nature",
-    "morning tea cup",
-    "warm sunlight home",
-    "morning road landscape",
-    "rural sunrise field",
-    "morning sunlight flowers",
-    "peaceful morning room",
-    "soft sunlight curtain",
-    "morning sky pastel",
-    "dawn forest light",
-    "sunrise tropical beach",
-  ],
-  afternoon: [
-    "afternoon nature",
-    "sunny garden",
-    "coffee table afternoon",
-    "beach sunlight",
-    "calm countryside afternoon",
-    "flowers sunshine",
-    "afternoon sky clouds",
-    "green field sunlight",
-    "afternoon park trees",
-    "warm light living room",
-    "tea table sunlight",
-    "bright flowers garden",
-    "sunny window home",
-    "afternoon sea landscape",
-    "sunny city park",
-    "relaxing balcony sunlight",
-    "golden afternoon field",
-    "summer sunlight nature",
-    "sunlit path trees",
-    "peaceful village afternoon",
-    "sunny lake view",
-    "afternoon tropical garden",
-    "afternoon terrace plants",
-    "countryside flowers sunlight",
-    "calm beach afternoon",
-    "light through leaves",
-    "warm home interior sunlight",
-    "afternoon picnic landscape",
-    "sunny floral background",
-    "soft golden daylight",
-  ],
-  night: [
-    "moon night landscape",
-    "cozy night window",
-    "night city lights",
-    "calm moon sky",
-    "peaceful evening nature",
-    "twilight landscape",
-    "night ocean moon",
-    "sunset dusk horizon",
-    "evening lake reflection",
-    "night street lights",
-    "moon over mountains",
-    "night forest sky",
-    "city skyline night",
-    "evening beach twilight",
-    "calm stars ocean",
-    "night clouds moonlight",
-    "balcony night lights",
-    "quiet evening room",
-    "dusk countryside",
-    "night sea horizon",
-    "lantern night ambience",
-    "cozy bedroom night",
-    "moonlit road landscape",
-    "twilight garden lights",
-    "deep blue evening sky",
-    "serene night window",
-    "night river reflection",
-    "sunset purple sky",
-    "evening clouds gold",
-    "peaceful moon horizon",
-  ],
+const themedQueries: Record<GreetingType, Record<string, string[]>> = {
+  morning: {
+    pets: [
+      "cute kitten morning light",
+      "cute puppy sunrise",
+      "cat by window morning light",
+      "dog in garden sunrise",
+      "cute rabbit morning sunlight",
+      "puppy smiling morning grass",
+      "kitten flowers sunrise",
+      "small dog cozy morning",
+      "golden retriever morning light",
+      "sleepy cat warm sunlight",
+      "cute pet by window sunrise",
+      "puppy in flower field morning",
+      "cat stretching morning light",
+      "dog happy sunrise park",
+      "cute kitten cozy blanket morning",
+    ],
+    babies: [
+      "baby smiling morning",
+      "happy baby sunlight",
+      "baby laughing soft light",
+      "sleepy baby waking up",
+      "baby hands flowers morning",
+      "baby smiling window light",
+      "baby with teddy bear morning",
+      "happy infant gentle sunlight",
+      "baby portrait warm morning",
+      "cute baby peaceful morning",
+      "baby joy sunrise light",
+      "mother holding baby morning",
+    ],
+    smiles: [
+      "woman smiling morning sunlight",
+      "man smiling morning coffee",
+      "happy grandmother morning light",
+      "smiling child morning",
+      "family smiling breakfast morning",
+      "joyful portrait sunrise light",
+      "happy people morning park",
+      "smiling elderly couple morning",
+      "happy girl flowers sunlight",
+      "soft smile golden morning",
+      "smiling face warm window light",
+      "laughing child sunrise",
+    ],
+    flowers: [
+      "sunrise flowers garden",
+      "morning dew flowers",
+      "rose garden morning light",
+      "sunflower field sunrise",
+      "daisy flowers sunlight morning",
+      "peony flowers soft light",
+      "wildflowers sunrise field",
+      "pink flowers morning bokeh",
+      "lavender sunrise field",
+      "yellow flowers morning light",
+      "flower bouquet window morning",
+      "bright garden flowers dawn",
+      "fresh flowers vase morning",
+      "tulips sunrise light",
+      "blossom tree morning sunlight",
+    ],
+    gardens: [
+      "beautiful garden morning",
+      "peaceful garden sunrise",
+      "cozy garden path morning",
+      "morning backyard flowers",
+      "lush garden sunlight",
+      "garden bench sunrise",
+      "cottage garden morning light",
+      "tropical garden sunrise",
+      "morning greenhouse flowers",
+      "botanical garden early light",
+      "sunlit garden arch morning",
+      "peaceful home garden morning",
+    ],
+    cozy: [
+      "morning coffee flowers",
+      "cozy breakfast table",
+      "tea cup sunrise",
+      "warm home morning light",
+      "cozy window sunlight",
+      "breakfast table sunlight",
+      "croissant coffee sunrise",
+      "morning coffee aesthetic",
+      "cozy bed tray breakfast",
+      "window curtains morning glow",
+      "warm kitchen sunlight morning",
+      "cozy chair window morning",
+      "book and coffee morning light",
+      "breakfast tray flowers sunlight",
+      "quiet home sunrise",
+    ],
+    nature: [
+      "golden sunrise nature",
+      "sunrise over ocean",
+      "sunrise mountain view",
+      "calm lake sunrise",
+      "morning countryside",
+      "rural sunrise field",
+      "soft clouds sunrise",
+      "peaceful forest dawn",
+      "morning river sunlight",
+      "beach sunrise golden sky",
+      "pastel sky morning landscape",
+      "sunrise hills landscape",
+      "dawn sky horizon",
+      "misty morning nature",
+      "sunlight through trees morning",
+      "fresh meadow sunrise",
+    ],
+  },
+
+  afternoon: {
+    pets: [
+      "cute dog smiling park",
+      "cute kitten garden afternoon",
+      "cat relaxing sunlight",
+      "happy dog flowers field",
+      "golden retriever sunny park",
+      "kitten on balcony sunlight",
+      "small dog cozy afternoon",
+      "cat laying in garden sun",
+      "puppy portrait sunshine",
+      "cute pet picnic park",
+      "dog playing field afternoon",
+      "cat among flowers sunlight",
+      "sleepy dog warm sunlight",
+      "kitten by window afternoon",
+      "happy puppy grass sunshine",
+    ],
+    babies: [
+      "baby laughing sunlight",
+      "baby in garden afternoon",
+      "baby smiling park sunlight",
+      "toddler laughing outdoors",
+      "happy infant flowers field",
+      "baby portrait warm afternoon",
+      "child joy sunshine",
+      "baby with mother garden",
+      "toddler smiling nature",
+      "little child warm sunlight",
+      "baby and teddy afternoon",
+      "child in flower meadow",
+    ],
+    smiles: [
+      "happy woman smiling flowers",
+      "smiling family picnic park",
+      "elderly couple garden sunlight",
+      "joyful portrait soft daylight",
+      "happy child sunny park",
+      "smiling friends outdoors",
+      "smile close up sunlight",
+      "happy grandmother flowers",
+      "laughing girl in field",
+      "happy people summer sunlight",
+      "warm portrait afternoon smile",
+      "family happiness outdoors",
+    ],
+    flowers: [
+      "sunny flower garden",
+      "beautiful roses garden",
+      "colorful flowers sunshine",
+      "sunflower field afternoon",
+      "lavender garden sunlight",
+      "bright peonies afternoon",
+      "tulip field sunshine",
+      "flowers close up sunlight",
+      "wildflowers summer afternoon",
+      "pink roses sunlight",
+      "gerbera flowers bright",
+      "daisy meadow sunshine",
+      "fresh bouquet golden daylight",
+      "hydrangea flowers summer light",
+      "flower path sunny garden",
+    ],
+    gardens: [
+      "peaceful garden bench",
+      "green backyard afternoon",
+      "sunny botanical garden",
+      "garden path flowers sunlight",
+      "cottage garden afternoon",
+      "tropical garden sunshine",
+      "relaxing balcony plants",
+      "sunlit garden trees",
+      "greenhouse flowers afternoon",
+      "beautiful patio garden",
+      "lush courtyard sunlight",
+      "quiet garden home afternoon",
+    ],
+    cozy: [
+      "cozy tea table flowers",
+      "afternoon coffee table flowers",
+      "tea and cake sunlight",
+      "cozy living room sunlight",
+      "warm home interior sunlight",
+      "sunny window home",
+      "book tea flowers afternoon",
+      "coffee cup on table sunlight",
+      "balcony coffee sunshine",
+      "quiet reading corner sunlight",
+      "cozy sofa warm daylight",
+      "home decor flowers afternoon",
+      "aesthetic tea set sunlight",
+      "afternoon rest by window",
+      "coffee and cookies sunlight",
+    ],
+    nature: [
+      "beach sunlight calm",
+      "afternoon lake landscape",
+      "sunny countryside field",
+      "green park sunlight",
+      "summer meadow sunshine",
+      "calm ocean daylight",
+      "afternoon sky beautiful clouds",
+      "sunlit tree path",
+      "warm golden field",
+      "soft light leaves",
+      "peaceful village afternoon",
+      "river sunlight landscape",
+      "mountain field daylight",
+      "garden butterflies sunlight",
+      "nature walkway sunshine",
+      "tropical beach afternoon",
+    ],
+  },
+
+  night: {
+    pets: [
+      "cute sleeping kitten",
+      "cute sleeping puppy",
+      "cat by window night",
+      "dog sleeping cozy blanket",
+      "kitten moonlight cozy",
+      "puppy peaceful sleep",
+      "cat curled blanket night",
+      "dog warm bed evening",
+      "sleepy pet cozy room",
+      "kitten lamp light night",
+      "sleeping cat aesthetic",
+      "puppy dreaming blanket",
+      "cat cozy night room",
+      "small dog bedtime",
+      "sleeping pet warm light",
+    ],
+    babies: [
+      "baby sleeping peacefully",
+      "baby sleeping teddy bear",
+      "mother holding baby night",
+      "sleeping child cozy room",
+      "baby bedtime warm light",
+      "child sleeping peacefully",
+      "baby blanket moonlight",
+      "newborn sleeping soft light",
+      "bedtime child lamp light",
+      "sleeping infant calm room",
+      "baby peaceful night",
+      "family bedtime cozy",
+    ],
+    smiles: [
+      "smiling couple sunset",
+      "happy family evening home",
+      "warm portrait evening smile",
+      "joyful woman sunset",
+      "elderly couple twilight",
+      "soft smile candle light",
+      "happy friends sunset beach",
+      "smiling child evening",
+      "family warm evening lights",
+      "gentle smile twilight glow",
+      "peaceful portrait moonlight",
+      "sunset happiness portrait",
+    ],
+    flowers: [
+      "moonlight flowers garden",
+      "sunset field flowers",
+      "purple flowers evening light",
+      "roses twilight garden",
+      "night flowers soft lights",
+      "lavender sunset field",
+      "golden sunset flowers",
+      "flower garden lanterns",
+      "daisy field twilight",
+      "peony flowers sunset",
+      "romantic garden flowers evening",
+      "flower silhouette sunset sky",
+    ],
+    gardens: [
+      "lantern garden evening",
+      "cozy garden lights night",
+      "twilight garden path",
+      "night backyard warm lights",
+      "romantic garden evening",
+      "patio lights cozy night",
+      "garden bench moonlight",
+      "quiet courtyard evening",
+      "cottage garden sunset",
+      "fairy lights garden night",
+      "green garden twilight",
+      "home garden lamp evening",
+    ],
+    cozy: [
+      "cozy candle light room",
+      "warm lights window night",
+      "cozy bedroom warm lights",
+      "relaxing evening tea lights",
+      "peaceful room lamp light",
+      "good night cozy aesthetic",
+      "book candle cozy night",
+      "warm blanket tea evening",
+      "lamp light cozy home",
+      "soft pillows bedtime aesthetic",
+      "candle glow home decor",
+      "night window warm room",
+      "cozy sofa lamp night",
+      "bedside lamp peaceful night",
+      "quiet home night aesthetic",
+    ],
+    nature: [
+      "peaceful night sky stars",
+      "moon over mountains",
+      "twilight lake reflection",
+      "night river reflection",
+      "sunset beach romantic",
+      "purple sunset landscape",
+      "deep blue evening sky",
+      "calm moon sky",
+      "serene moon horizon",
+      "sunset over ocean peaceful",
+      "quiet countryside dusk",
+      "night city lights warm",
+      "orange pink sunset sky",
+      "evening clouds gold",
+      "twilight ocean horizon",
+      "starlit landscape peaceful",
+    ],
+  },
 };
 
 const greetingMessages: Record<GreetingType, string[]> = {
@@ -192,6 +435,12 @@ const greetingMessages: Record<GreetingType, string[]> = {
     "☀️ Que a luz desta manhã ilumine o seu caminho.",
     "🌻 Tenha um dia cheio de bons encontros.",
     "🌿 Que sua manhã seja suave e agradável.",
+    "😊 Que o dia traga sorrisos sinceros.",
+    "🍀 Bom dia com carinho e boas energias.",
+    "🌅 Que sua jornada hoje seja leve e feliz.",
+    "💛 Aproveite o dia com calma e gratidão.",
+    "☕ Desejo um despertar tranquilo e cheio de paz.",
+    "🌼 Que o seu dia tenha pequenos momentos felizes.",
   ],
   afternoon: [
     "🌤️ Que sua tarde siga leve e bonita.",
@@ -212,6 +461,10 @@ const greetingMessages: Record<GreetingType, string[]> = {
     "🍀 Que a paz acompanhe suas próximas horas.",
     "🌿 Desejo uma tarde calma e feliz.",
     "✨ Que o dia continue te surpreendendo positivamente.",
+    "☕ Um descanso, um respiro e uma boa tarde.",
+    "🌸 Que a sua tarde seja leve por dentro e por fora.",
+    "💫 Continue o dia com esperança e ânimo.",
+    "🌤️ Boa tarde com muita leveza.",
   ],
   night: [
     "🌙 Que sua noite seja calma e tranquila.",
@@ -232,11 +485,24 @@ const greetingMessages: Record<GreetingType, string[]> = {
     "💫 Bons sonhos e coração tranquilo.",
     "🌙 Que você tenha um descanso profundo e leve.",
     "⭐ Boa noite com afeto e tranquilidade.",
+    "🕯️ Que seu final de dia seja calmo e bonito.",
+    "🌠 A noite também é um presente de paz.",
+    "💙 Descanse bem e cuide de você.",
+    "🌃 Que sua noite seja silenciosa e agradável.",
   ],
 };
 
 function randomIndex(length: number): number {
   return Math.floor(Math.random() * length);
+}
+
+function shuffleArray<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
 
 function pickRandomUnique<T>(items: T[], recent: T[] = []): T | null {
@@ -258,6 +524,10 @@ function pushRecent(greetingType: GreetingType, imageUrl: string) {
   while (history.length > RECENT_HISTORY_LIMIT) {
     history.shift();
   }
+}
+
+function getAllQueriesForGreeting(greetingType: GreetingType): string[] {
+  return Object.values(themedQueries[greetingType]).flat();
 }
 
 async function buscarImagensDaQuery(query: string): Promise<string[]> {
@@ -299,12 +569,28 @@ async function buscarImagensDaQuery(query: string): Promise<string[]> {
 async function buscarImagemAleatoria(
   greetingType: GreetingType,
 ): Promise<string> {
-  const queryOptions = [...queries[greetingType]].sort(() => Math.random() - 0.5);
   const history = recentImagesByGreeting[greetingType];
+  const themes = shuffleArray(Object.keys(themedQueries[greetingType]));
 
-  for (const query of queryOptions) {
+  for (const theme of themes) {
+    const queries = shuffleArray(themedQueries[greetingType][theme]);
+
+    for (const query of queries) {
+      const fotos = await buscarImagensDaQuery(query);
+      const escolhida = pickRandomUnique(fotos, history);
+
+      if (escolhida) {
+        pushRecent(greetingType, escolhida);
+        return escolhida;
+      }
+    }
+  }
+
+  const allQueries = shuffleArray(getAllQueriesForGreeting(greetingType));
+
+  for (const query of allQueries) {
     const fotos = await buscarImagensDaQuery(query);
-    const escolhida = pickRandomUnique(fotos, history);
+    const escolhida = pickRandomUnique(fotos);
 
     if (escolhida) {
       pushRecent(greetingType, escolhida);
@@ -389,8 +675,7 @@ export async function generateGreetingImage(
 
   if (!imageUrl) {
     const fallbackOptions = templates[greetingType];
-    const fallback =
-      fallbackOptions[randomIndex(fallbackOptions.length)];
+    const fallback = fallbackOptions[randomIndex(fallbackOptions.length)];
     imageUrl = fallback.backgroundUrl;
   }
 
@@ -401,7 +686,8 @@ export async function generateGreetingImage(
   };
 
   const greeting = greetingTexts[greetingType];
-  const nameText = name ? `, ${name}!` : "!";
+  const safeName = name.trim().slice(0, 20);
+  const nameText = safeName ? `, ${safeName}!` : "!";
   const message = getRandomMessage(greetingType);
 
   function desenharImagem(imagem: HTMLImageElement) {
@@ -427,10 +713,20 @@ export async function generateGreetingImage(
 
     ctx.font = "bold 64px Arial";
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(
-      `${greeting}${nameText}`,
+
+    const titleText = `${greeting}${nameText}`;
+    const titleMaxWidth = canvas.width - 120;
+    const titleLines = wrapText(ctx, titleText, titleMaxWidth);
+    const titleLineHeight = 70;
+    const titleStartY =
+      canvas.height / 2 - 120 - ((titleLines.length - 1) * titleLineHeight) / 2;
+
+    drawMultilineText(
+      ctx,
+      titleLines,
       canvas.width / 2,
-      canvas.height / 2 - 90,
+      titleStartY,
+      titleLineHeight,
     );
 
     ctx.font = "32px Arial";
@@ -445,7 +741,11 @@ export async function generateGreetingImage(
     ctx.font = "18px Arial";
     ctx.fillStyle = "rgba(255,255,255,0.82)";
     ctx.textAlign = "right";
-    ctx.fillText("bom-dia-gerador.vercel.app", canvas.width - 20, canvas.height - 20);
+    ctx.fillText(
+      "bom-dia-gerador.vercel.app",
+      canvas.width - 20,
+      canvas.height - 20,
+    );
 
     return canvas.toDataURL("image/png");
   }
@@ -467,9 +767,9 @@ export async function generateGreetingImage(
 }
 
 export function getTemplateCount(greetingType: GreetingType): number {
-  const queryOptions = queries[greetingType];
+  const allQueries = getAllQueriesForGreeting(greetingType);
 
-  const totalCached = queryOptions.reduce((acc, query) => {
+  const totalCached = allQueries.reduce((acc, query) => {
     return acc + (imageCache[query]?.length || 0);
   }, 0);
 

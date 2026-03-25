@@ -5,8 +5,10 @@ import { GreetingButton } from "./components/GreetingButton";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { Toast } from "./components/Toast";
 import AdBanner from "./components/AdBanner";
-import { generateGreetingImage } from "./utils/imageGenerator";
-import { getTemplateCount } from "./utils/imageGenerator";
+import {
+  generateGreetingImage,
+  getTemplateCount,
+} from "./utils/imageGenerator";
 import { RefreshCw, Download, ArrowLeft, Sparkles } from "lucide-react";
 
 type GreetingType = "morning" | "afternoon" | "night";
@@ -26,6 +28,15 @@ export default function App() {
   const [highlightGenerateArea, setHighlightGenerateArea] = useState(false);
 
   const generateSectionRef = useRef<HTMLDivElement | null>(null);
+
+  const NAME_LIMIT = 20;
+
+  const handleNameChange = (value: string) => {
+    const trimmed = value.slice(0, NAME_LIMIT);
+    setName(trimmed);
+  };
+
+  const isNameLimitReached = name.length >= NAME_LIMIT;
 
   const greetings = [
     { type: "morning" as GreetingType, emoji: "🌞", text: "Bom dia" },
@@ -75,6 +86,7 @@ export default function App() {
     } catch (error) {
       console.error("Error generating image:", error);
       showToast("Erro ao gerar imagem. Tente novamente.");
+      setScreen("home");
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +100,9 @@ export default function App() {
     try {
       const templateCount = getTemplateCount(selectedGreeting);
       const nextIndex = (currentTemplateIndex + 1) % Math.max(templateCount, 1);
+
       const imageData = await generateGreetingImage(selectedGreeting, name);
+
       setGeneratedImage(imageData);
       setCurrentTemplateIndex(nextIndex);
       showToast("Nova imagem gerada!");
@@ -127,7 +141,7 @@ export default function App() {
       const nameText = name ? `, ${name}!` : "!";
       const shareText = `${greeting}${nameText}
 
-      Crie também: https://bom-dia-gerador.vercel.app/`;
+Crie também: https://bom-dia-gerador.vercel.app/`;
 
       const response = await fetch(generatedImage);
       const blob = await response.blob();
@@ -240,11 +254,44 @@ export default function App() {
                   </p>
                 </div>
 
-                <Input
-                  value={name}
-                  onChange={setName}
-                  placeholder="Digite seu nome (opcional)"
-                />
+                <div className="space-y-2">
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={handleNameChange}
+                    placeholder="Digite seu nome (opcional)"
+                    maxLength={NAME_LIMIT}
+                    className={
+                      isNameLimitReached
+                        ? "border-red-500 focus-visible:ring-red-500/40 focus-visible:border-red-500"
+                        : ""
+                    }
+                  />
+
+                  <div className="flex items-center justify-between px-1">
+                    <span
+                      className={`text-sm transition-colors ${
+                        isNameLimitReached
+                          ? "text-red-600 font-medium"
+                          : "text-[#717182]"
+                      }`}
+                    >
+                      {isNameLimitReached
+                        ? "Limite de 20 caracteres atingido"
+                        : "Máximo de 20 caracteres"}
+                    </span>
+
+                    <span
+                      className={`text-sm transition-colors ${
+                        isNameLimitReached
+                          ? "text-red-600 font-semibold"
+                          : "text-[#717182]"
+                      }`}
+                    >
+                      {name.length}/{NAME_LIMIT}
+                    </span>
+                  </div>
+                </div>
 
                 <div className="pt-2">
                   <Button
@@ -288,11 +335,17 @@ export default function App() {
                       : "scale-100"
                   } animate-in zoom-in duration-500`}
                 >
-                  <img
-                    src={generatedImage}
-                    alt="Greeting"
-                    className="w-full h-auto rounded-2xl aspect-square object-cover"
-                  />
+                  {generatedImage ? (
+                    <img
+                      src={generatedImage}
+                      alt="Greeting"
+                      className="w-full h-auto rounded-2xl aspect-square object-cover"
+                    />
+                  ) : (
+                    <div className="w-full aspect-square rounded-2xl flex items-center justify-center text-[#717182] bg-white">
+                      Nenhuma imagem gerada
+                    </div>
+                  )}
                 </div>
 
                 {/* <AdBanner /> */}
@@ -318,7 +371,11 @@ export default function App() {
                     className="animate-in slide-in-from-bottom duration-300"
                     style={{ animationDelay: "300ms" }}
                   >
-                    <Button onClick={handleNativeShare} variant="primary">
+                    <Button
+                      onClick={handleNativeShare}
+                      variant="primary"
+                      disabled={!generatedImage}
+                    >
                       <span className="text-2xl">Compartilhar imagem</span>
                     </Button>
                   </div>
@@ -327,7 +384,11 @@ export default function App() {
                     className="animate-in slide-in-from-bottom duration-300"
                     style={{ animationDelay: "400ms" }}
                   >
-                    <Button onClick={handleDownloadImage} variant="secondary">
+                    <Button
+                      onClick={handleDownloadImage}
+                      variant="secondary"
+                      disabled={!generatedImage}
+                    >
                       <span className="flex items-center justify-center gap-3 text-2xl">
                         <Download className="w-7 h-7" />
                         Baixar imagem
